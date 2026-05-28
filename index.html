@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mike the Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --surface2: #1e1e21;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8e6e0;
+    --muted: #888680;
+    --accent: #c8f56a;
+    --accent2: #6af5c8;
+    --accent3: #f5a56a;
+    --tag-bg: rgba(255,255,255,0.05);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* grid noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M0 60V0h1v60zm60-60H0v1h60z' stroke='rgba(255,255,255,0.015)' stroke-width='.5'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .wrapper { max-width: 900px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem 0; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: rgba(14,14,15,0.85);
+    backdrop-filter: blur(12px); z-index: 100;
+  }
+  .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 2rem; width: 100%; display: flex; align-items: center; justify-content: space-between; }
+  .nav-logo { font-family: 'DM Serif Display', serif; font-size: 1.1rem; letter-spacing: -0.01em; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; font-size: 0.85rem; font-weight: 400; color: var(--muted); }
+  .nav-links a { transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── HERO ── */
+  .hero { padding: 7rem 0 5rem; }
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.15em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block; width: 2rem; height: 1px;
+    background: var(--accent);
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--muted);
+    max-width: 540px; line-height: 1.7;
+    margin-bottom: 2.5rem;
+  }
+  .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.65rem 1.4rem; border-radius: 4px;
+    font-size: 0.875rem; font-weight: 500; font-family: 'Outfit', sans-serif;
+    transition: all 0.2s; cursor: pointer; border: none;
+  }
+  .btn-primary { background: var(--accent); color: #0e0e0f; }
+  .btn-primary:hover { background: #d9ff7a; transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.3); background: var(--surface); }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex; gap: 0; border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; margin: 4rem 0;
+  }
+  .stat {
+    flex: 1; padding: 1.25rem 1.5rem;
+    border-right: 1px solid var(--border);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem; color: var(--accent);
+    line-height: 1; margin-bottom: 0.25rem;
+  }
+  .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 400; }
+
+  /* ── SECTION HEADERS ── */
+  .section { padding: 4rem 0; border-top: 1px solid var(--border); }
+  .section-header {
+    display: flex; align-items: baseline;
+    justify-content: space-between; margin-bottom: 2.5rem;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem; letter-spacing: -0.02em;
+  }
+  .section-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; color: var(--muted);
+  }
+
+  /* ── PHASE TRACKER ── */
+  .phase-list { display: flex; flex-direction: column; gap: 0; }
+  .phase-item {
+    display: grid; grid-template-columns: 2.5rem 1fr;
+    gap: 1rem; padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .phase-item:last-child { border-bottom: none; }
+  .phase-num {
+    font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    color: var(--muted); padding-top: 0.15rem;
+  }
+  .phase-content {}
+  .phase-name { font-weight: 500; font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .phase-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; }
+  .phase-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .phase-tag {
+    font-size: 0.7rem; font-family: 'DM Mono', monospace;
+    padding: 0.2rem 0.55rem; border-radius: 3px;
+    background: var(--tag-bg); border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .phase-status {
+    font-size: 0.7rem; font-family: 'DM Mono', monospace;
+    padding: 0.2rem 0.55rem; border-radius: 3px;
+  }
+  .status-active { background: rgba(200,245,106,0.1); border: 1px solid rgba(200,245,106,0.3); color: var(--accent); }
+  .status-next   { background: rgba(106,245,200,0.07); border: 1px solid rgba(106,245,200,0.2); color: var(--accent2); }
+  .status-upcoming { background: var(--tag-bg); border: 1px solid var(--border); color: var(--muted); }
+
+  /* ── PROJECT CARDS ── */
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .project-card {
+    background: var(--surface);
+    padding: 1.5rem;
+    transition: background 0.2s;
+    display: flex; flex-direction: column; gap: 0.75rem;
+  }
+  .project-card:hover { background: var(--surface2); }
+  .project-card.placeholder { opacity: 0.4; }
+  .project-header { display: flex; align-items: flex-start; justify-content: space-between; }
+  .project-icon {
+    width: 36px; height: 36px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; background: var(--surface2);
+    border: 1px solid var(--border2);
+  }
+  .project-links { display: flex; gap: 0.5rem; }
+  .project-link {
+    width: 28px; height: 28px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); color: var(--muted);
+    transition: all 0.2s; font-size: 0.75rem;
+  }
+  .project-link:hover { border-color: var(--border2); color: var(--text); }
+  .project-name { font-weight: 500; font-size: 0.95rem; }
+  .project-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.6; flex: 1; }
+  .project-stack { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: auto; padding-top: 0.5rem; }
+  .stack-tag {
+    font-size: 0.68rem; font-family: 'DM Mono', monospace;
+    padding: 0.15rem 0.5rem; border-radius: 3px;
+    background: var(--tag-bg); border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .stack-tag.accent { color: var(--accent); border-color: rgba(200,245,106,0.25); background: rgba(200,245,106,0.06); }
+
+  /* ── LOG ── */
+  .log-list { display: flex; flex-direction: column; gap: 0; }
+  .log-entry {
+    display: grid; grid-template-columns: 7rem 1fr;
+    gap: 1.5rem; padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-date { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); padding-top: 0.2rem; }
+  .log-title { font-weight: 500; font-size: 0.9rem; margin-bottom: 0.3rem; }
+  .log-body { font-size: 0.83rem; color: var(--muted); line-height: 1.65; }
+  .log-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.5rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 0;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.8rem; color: var(--muted);
+  }
+  .footer-inner { max-width: 900px; margin: 0 auto; padding: 0 2rem; width: 100%; display: flex; align-items: center; justify-content: space-between; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero > * { animation: fade-up 0.6s ease both; }
+  .hero-eyebrow  { animation-delay: 0.05s; }
+  .hero h1       { animation-delay: 0.12s; }
+  .hero-sub      { animation-delay: 0.2s; }
+  .hero-cta      { animation-delay: 0.28s; }
+
+  @media (max-width: 600px) {
+    .stats-bar { flex-direction: column; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .stat:last-child { border-bottom: none; }
+    .nav-links { display: none; }
+    .log-entry { grid-template-columns: 1fr; gap: 0.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">MJ<span>.</span></div>
+    <div class="nav-links">
+      <a href="#learning">Learning path</a>
+      <a href="#projects">Projects</a>
+      <a href="#log">Log</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">Mike the Builder</div>
+    <h1>From learning AI<br>to <em>doing</em> AI.</h1>
+    <p class="hero-sub">
+      One guy's hands-on journey through automation, agents, and ambient AI —
+      documented in public, one project at a time.
+    </p>
+    <div class="hero-cta">
+      <a href="https://github.com/mikejennings2010" target="_blank" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+        GitHub
+      </a>
+      <a href="#projects" class="btn btn-outline">View projects</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="projects-count">0</div>
+      <div class="stat-label">Projects shipped</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="tools-count">0</div>
+      <div class="stat-label">Tools explored</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="weeks-count">0</div>
+      <div class="stat-label">Weeks in</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Phases planned</div>
+    </div>
+  </div>
+
+  <!-- LEARNING PATH -->
+  <section class="section" id="learning">
+    <div class="section-header">
+      <h2 class="section-title">Learning path</h2>
+      <span class="section-count">36 weeks · 1hr/day</span>
+    </div>
+    <div class="phase-list">
+
+      <div class="phase-item">
+        <div class="phase-num">01</div>
+        <div class="phase-content">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;">
+            <div class="phase-name">Foundation</div>
+            <span class="phase-status status-active">Active</span>
+          </div>
+          <div class="phase-desc">First real projects. Corporate email automation + personal agentic workflow lab.</div>
+          <div class="phase-tags">
+            <span class="phase-tag">Power Automate</span>
+            <span class="phase-tag">n8n Cloud</span>
+            <span class="phase-tag">OpenAI API</span>
+            <span class="phase-tag">GitHub</span>
+            <span class="phase-tag">Cursor</span>
+            <span class="phase-tag">Airtable</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-num">02</div>
+        <div class="phase-content">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;">
+            <div class="phase-name">Python + AI integration</div>
+            <span class="phase-status status-next">Up next</span>
+          </div>
+          <div class="phase-desc">Start coding, connect directly to LLMs, explore multiple model providers.</div>
+          <div class="phase-tags">
+            <span class="phase-tag">Google Colab</span>
+            <span class="phase-tag">Replit</span>
+            <span class="phase-tag">Claude API</span>
+            <span class="phase-tag">Mistral</span>
+            <span class="phase-tag">Perplexity</span>
+            <span class="phase-tag">NotebookLM</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-num">03</div>
+        <div class="phase-content">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;">
+            <div class="phase-name">Advanced agents + coding tools</div>
+            <span class="phase-status status-upcoming">Upcoming</span>
+          </div>
+          <div class="phase-desc">Build real agents. Deploy things. Agentic coding tools and cloud infrastructure.</div>
+          <div class="phase-tags">
+            <span class="phase-tag">Claude Code</span>
+            <span class="phase-tag">Codex</span>
+            <span class="phase-tag">OpenCode</span>
+            <span class="phase-tag">Firebase</span>
+            <span class="phase-tag">Netlify</span>
+            <span class="phase-tag">Obsidian</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-num">04</div>
+        <div class="phase-content">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;">
+            <div class="phase-name">AI media + design</div>
+            <span class="phase-status status-upcoming">Upcoming</span>
+          </div>
+          <div class="phase-desc">Multimodal, generative, and visual AI tools. Voice, image, and design workflows.</div>
+          <div class="phase-tags">
+            <span class="phase-tag">ElevenLabs</span>
+            <span class="phase-tag">Leonardo AI</span>
+            <span class="phase-tag">Civitai</span>
+            <span class="phase-tag">Figma</span>
+            <span class="phase-tag">Azure AI Foundry</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-item">
+        <div class="phase-num">05</div>
+        <div class="phase-content">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.3rem;">
+            <div class="phase-name">Ambient AI + enterprise</div>
+            <span class="phase-status status-upcoming">Upcoming</span>
+          </div>
+          <div class="phase-desc">Multi-agent frameworks. Enterprise deployment. Ambient AI at scale.</div>
+          <div class="phase-tags">
+            <span class="phase-tag">Copilot Studio</span>
+            <span class="phase-tag">GitHub Copilot</span>
+            <span class="phase-tag">LangGraph</span>
+            <span class="phase-tag">AutoGen</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section" id="projects">
+    <div class="section-header">
+      <h2 class="section-title">Projects</h2>
+      <span class="section-count">Updated as I build</span>
+    </div>
+    <div class="projects-grid">
+
+      <!-- ADD YOUR REAL PROJECTS HERE — duplicate a .project-card block for each -->
+
+      <div class="project-card placeholder">
+        <div class="project-header">
+          <div class="project-icon">✉</div>
+        </div>
+        <div class="project-name">Email triage automation</div>
+        <div class="project-desc">Power Automate workflow that classifies, summarizes, and routes incoming emails using AI. First corporate automation project.</div>
+        <div class="project-stack">
+          <span class="stack-tag accent">In progress</span>
+          <span class="stack-tag">Power Automate</span>
+          <span class="stack-tag">OpenAI</span>
+          <span class="stack-tag">Outlook</span>
+        </div>
+      </div>
+
+      <div class="project-card placeholder">
+        <div class="project-header">
+          <div class="project-icon">⚡</div>
+        </div>
+        <div class="project-name">n8n agentic pipeline</div>
+        <div class="project-desc">Personal workflow agent that monitors inputs, makes LLM-powered decisions, and takes actions across tools.</div>
+        <div class="project-stack">
+          <span class="stack-tag accent">Planned</span>
+          <span class="stack-tag">n8n</span>
+          <span class="stack-tag">OpenAI</span>
+          <span class="stack-tag">Airtable</span>
+        </div>
+      </div>
+
+      <div class="project-card placeholder">
+        <div class="project-header">
+          <div class="project-icon">+</div>
+        </div>
+        <div class="project-name">More coming</div>
+        <div class="project-desc">Projects added here as each phase completes. All code lives on GitHub.</div>
+        <div class="project-stack">
+          <span class="stack-tag">Python</span>
+          <span class="stack-tag">GitHub</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- LEARNING LOG -->
+  <section class="section" id="log">
+    <div class="section-header">
+      <h2 class="section-title">Learning log</h2>
+      <span class="section-count">Latest entries first</span>
+    </div>
+    <div class="log-list">
+
+      <!-- ADD LOG ENTRIES HERE — copy a .log-entry block for each new entry -->
+
+      <div class="log-entry">
+        <div class="log-date">May 2026</div>
+        <div>
+          <div class="log-title">Starting the journey</div>
+          <div class="log-body">
+            Mapped out a 36-week learning plan covering automation, agents, and ambient AI.
+            Split into two tracks: corporate (Power Automate, M365) and personal (n8n Cloud, OpenAI API).
+            Setting up GitHub portfolio and this site as home base.
+          </div>
+          <div class="log-tags">
+            <span class="phase-tag">n8n</span>
+            <span class="phase-tag">Power Automate</span>
+            <span class="phase-tag">Planning</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-entry">
+        <div class="log-date">—</div>
+        <div>
+          <div class="log-title">Your next entry goes here</div>
+          <div class="log-body">
+            Add a short paragraph about what you built, what you learned, what surprised you.
+            No need to be polished — authentic beats perfect for a learning log.
+          </div>
+          <div class="log-tags">
+            <span class="phase-tag">Template</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div><!-- /wrapper -->
+
+<footer>
+  <div class="footer-inner">
+    <span>Mike the Builder · AI &amp; Automation</span>
+    <div class="footer-links">
+      <a href="https://github.com/mikejennings2010" target="_blank">GitHub</a>
+      <a href="https://www.linkedin.com/in/mikejennings2010" target="_blank">LinkedIn</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Animate stats counters on load
+  function animateCount(el, target, duration) {
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(ease * target);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  window.addEventListener('load', () => {
+    // UPDATE THESE NUMBERS as you make progress
+    animateCount(document.getElementById('projects-count'), 0, 800);
+    animateCount(document.getElementById('tools-count'), 1, 900);
+    animateCount(document.getElementById('weeks-count'), 1, 700);
+  });
+</script>
+
+</body>
+</html>
